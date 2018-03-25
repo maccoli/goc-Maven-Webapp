@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="goc.dao.UserMapper">
+	<resultMap id="BaseResultMap" type="goc.pojo.User">
+		<id column="userid" property="userid" jdbcType="INTEGER" />
+		<result column="username" property="username" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<result column="sex" property="sex" jdbcType="VARCHAR" />
+		<result column="head" property="head" jdbcType="VARCHAR" />
+		<result column="contact" property="contact" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		userid,username,password,sex,age,head,contact,introduction,email
+	</sql>
+
+	<select id="SelectByUserid" resultMap="BaseResultMap"
+		parameterType="Java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from user
+		where userid=#{userid,jdbcType=INTEGER}
+	</select>
+
+	<select id="SelectByUsername" resultMap="BaseResultMap"
+		parameterType="Java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from user
+		where username=#{username,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SelectByPhone" resultMap="BaseResultMap"
+		parameterType="Java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from user
+		where phone=#{phone,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="InsertUser" parameterType="goc.pojo.User">
+		insert into
+		user(userid,username,password,sex,age,head,contact,introduction,email)
+		values(userid=#{userid,jdbcType=INTEGER},
+		username=#{username,jdbcType=VARCHAR},
+		head=#{head,jdbcType=VARCHAR},
+		age=#{age,jdbcType=INTEGER},
+		sex=#{sex,jdbcType=VARCHAR},
+		contact=#{contact,jdbcType=VARCHAR},
+		introduction=#{introduction,jdbcType=VARCHAR},
+		email=#{email,jdbcType=VARCHAR}
+		where
+		userid=#{userid,jdbcType=INTEGER})
+	</insert>
+
+	<update id="UpdateByUserid" parameterType="goc.pojo.User">
+		update user set
+		username=#{username,jdbcType=VARCHAR},
+		head=#{head,jdbcType=VARCHAR},
+		age=#{age,jdbcType=INTEGER},
+		sex=#{sex,jdbcType=VARCHAR},
+		contact=#{contact,jdbcType=VARCHAR},
+		introduction=#{introduction,jdbcType=VARCHAR},
+		email=#{email,jdbcType=VARCHAR}
+		where userid=#{userid,jdbcType=INTEGER}
+	</update>
+
+
+
+</mapper>
