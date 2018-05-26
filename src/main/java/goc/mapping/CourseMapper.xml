@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goc.dao.CourseMapper">
+	<resultMap  id="BaseResultMap" type="goc.pojo.Fresource">
+	    <id column="contentid" property="contentid" jdbcType="INTEGER" />
+		<result column="courseid" property="courseid" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="time" property="time" jdbcType="VARCHAR" />
+		<result column="contenturl" property="contenturl" jdbcType="VARCHAR" />
+		<result column="book" property="book" jdbcType="VARCHAR" />
+		<result column="browsings" property="browsings" jdbcType="INTEGER" />
+	</resultMap>
+    
+    <sql id="Base_Column_List">
+         contentid,content,time,contenturl,book,browsings
+    </sql>
+	
+	<resultMap id="FcourseMap" type="goc.pojo.Fcourse">
+		<id column="courseid" property="courseid" jdbcType="INTEGER" />
+		<result column="tcourseid" property="tcourseid" jdbcType="INTEGER" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="coursename" property="coursename" jdbcType="VARCHAR" />
+		<result column="label" property="label" jdbcType="VARCHAR" />
+		<result column="klabel" property="klabel" jdbcType="VARCHAR" />
+		<result column="astudydate" property="astudydate" jdbcType="INTEGER" />
+		<result column="bstudydate" property="bstudydate" jdbcType="INTEGER" />
+	</resultMap>
+
+     <sql id="Fcourse_Column_List">
+          courseid,tcourseid,level,coursename,label,klabel,astudydate,bstudydate
+     </sql>
+
+    <resultMap id="TcourseMap" type="goc.pojo.Tcourse">
+		<id column="tcourseid" property="tcourseid" jdbcType="INTEGER" />
+		<result column="tcoursename" property="tcoursename" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <resultMap id="StudycourseMap" type="goc.pojo.Studycourse">
+        <id column="userid" property="userid" jdbcType="INTEGER" />
+        <result column="courseid" property="courseid" jdbcType="INTEGER" />
+        <result column="tcourseid" property="tcourseid" jdbcType="INTEGER" />
+       	<result column="datenum" property="datenum" jdbcType="INTEGER" />
+       	<result column="startdate" property="startdate" jdbcType="DATE" />
+        <result column="enddate" property="enddate" jdbcType="DATE" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+    </resultMap>
+	
+    <select id="SelectAllTc" resultMap="TcourseMap">
+        select tcourseid,tcoursename
+        from tcourse
+    </select>
+	
+	<select id="SelectTcouseNameById" resultMap="TcourseMap" parameterType="java.lang.Integer">
+	    select tcoursename
+        from tcourse
+	    where tcourseid=#{tcourseid,jdbcType=INTEGER}
+	</select>
+	
+	<select id="SelectTcid" resultMap="TcourseMap" parameterType="java.lang.String">
+	    select tcourseid,tcoursename
+        from tcourse
+	    where tcoursename=#{tcoursename,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SelectFcid" resultType="java.lang.Integer" parameterType="java.lang.String">
+	    select courseid
+        from fcourse
+	    where coursename=#{coursename,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SelectFc" resultMap="FcourseMap" parameterType="java.lang.Integer">
+        select 
+        <include refid="Fcourse_Column_List"/>
+        from fcourse
+        where tcourseid=#{tcourseid,jdbcType=INTEGER}
+    </select>
+    
+    <select id="SelectFcBycid" resultMap="FcourseMap" parameterType="java.lang.Integer">
+        select 
+        <include refid="Fcourse_Column_List"/>
+        from fcourse
+        where courseid=#{courseid,jdbcType=INTEGER}
+    </select>
+    
+    <select id="SelectAllFc" resultMap="FcourseMap" parameterType="java.util.List">
+        select 
+        <include refid="Fcourse_Column_List"/>
+        from fcourse
+        where tcourseid in 
+        <foreach collection="list" item="item" index="index"
+           open="(" separator="," close=")">
+           #{item}
+        </foreach>
+    </select>
+    
+    <select id="SelectFcByCourseid" resultMap="FcourseMap" parameterType="java.util.List">
+        select 
+        <include refid="Fcourse_Column_List"/>
+        from fcourse
+        where courseid in 
+        <foreach collection="list" item="item" index="index"
+           open="(" separator="," close=")">
+           #{item}
+        </foreach>
+    </select>
+      
+    <select id="SelectFresource" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select 
+        <include refid="Base_Column_List"/>
+        from fresource
+        where courseid=#{courseid,jdbcType=INTEGER}
+    </select>
+    
+    <select id="SelectStudycourse" resultMap="StudycourseMap">
+        select userid,courseid,tcourseid,datenum,startdate,enddate
+        from studycourse
+        where userid=#{userid} and courseid=#{courseid}
+    </select>
+    
+    <select id="SelectCountDatenums" resultType="java.lang.Integer"> 
+        select sum(datenum)
+        from studycourse
+        where tcourseid=#{tcourseid} and userid=#{userid}
+    </select>
+    
+    <select id="SelectCountAdate" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select sum(astudydate)
+        from fcourse
+        where tcourseid=#{tcourseid,jdbcType=INTEGER}
+    </select>
+    
+    <select id="SelectCountBdate" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select sum(bstudydate)
+        from fcourse
+        where tcourseid=#{tcourseid,jdbcType=INTEGER}
+    </select>
+    
+    <select id="SelectBylabel" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select courseid
+        from fcourse
+        where label=#{label,jdbcType=VARCHAR}
+    </select>
+    
+    <insert id="InsertStudyCourse" parameterType="goc.pojo.Studycourse">
+        insert into studycourse(userid,courseid,tcourseid,datenum,startdate,enddate)
+        values(
+        #{userid,jdbcType=INTEGER},
+        #{courseid,jdbcType=INTEGER},
+        #{tcourseid,jdbcType=INTEGER},
+        #{datenum,jdbcType=INTEGER},
+        #{startdate,jdbcType=DATE},
+        #{enddate,jdbcType=DATE})
+    </insert>
+    
+</mapper>
