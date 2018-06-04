@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goc.dao.SummaryMapper">
+	<resultMap id="DaySummaryMap" type="goc.pojo.DaySummary">
+		<id column="userid" property="userid" jdbcType="INTEGER" />
+		<result column="daysummary" property="daysummary" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="DATE" />
+		<result column="score" property="score" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<resultMap id="WeekSummaryMap" type="goc.pojo.WeekSummary">
+		<id column="userid" property="userid" jdbcType="INTEGER" />
+		<result column="weeksummary" property="weeksummary" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="DATE" />
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		userid,daysummary,date,score
+	</sql>
+	
+	<select id="selectByUserid" resultMap="DaySummaryMap" parameterType="java.lang.Integer" >
+	    select 
+	    <include refid="Base_Column_List"/>
+	    from dsummary
+	    where userid=#{userid,jdbcType=INTEGER}
+	</select>
+	
+	<select id="selectByIdAndDate" resultMap="DaySummaryMap" parameterType="goc.pojo.DaySummary">
+	    select 
+	      <include refid="Base_Column_List"/>
+	    from dsummary
+	    where userid=#{userid,jdbcType=INTEGER} and date=#{date,jdbcType=DATE}
+	</select>
+	
+	<insert id="InsertDaySummary" parameterType="goc.pojo.DaySummary">
+	insert into dsummary(userid,daysummary,score,date)
+	values(#{userid,jdbcType=INTEGER},
+	#{daysummary,jdbcType=VARCHAR},
+    #{score,jdbcType=INTEGER},
+	#{date,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="InsertWeekSummary" parameterType="goc.pojo.WeekSummary">
+	insert into weeksummary(userid,weeksummary,date)
+	values(#{userid,jdbcType=INTEGER},
+	#{weeksummary,jdbcType=VARCHAR},
+	#{date,jdbcType=VARCHAR})
+	</insert>
+	
+</mapper>
