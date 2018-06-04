@@ -1,10 +1,12 @@
 package goc.pojo;
 
+import java.sql.Date;
+
 public class WeekSummary {
 
 	private Integer userid;
 	private String weeksummary;//每周小结
-	private String date;//日期
+	private Date date;//日期
 	@Override
 	public String toString() {
 		return "WeekSummary [userid=" + userid + ", weeksummary=" + weeksummary
@@ -22,12 +24,12 @@ public class WeekSummary {
 	public void setWeeksummary(String weeksummary) {
 		this.weeksummary = weeksummary;
 	}
-	public String getDate() {
+	public Date getDate() {
 		return date;
 	}
-	public void setDate(String date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
-	
+
 	
 }

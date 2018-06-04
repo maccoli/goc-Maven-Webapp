@@ -1,14 +1,17 @@
 package goc.pojo;
 
+import java.sql.Date;
+
 public class DaySummary {
 
 	private Integer userid;
+	private int score;//评分
 	private String daysummary;//每日小结
-	private String date;//日期
+	private Date date;//日期
 	@Override
 	public String toString() {
-		return "DaySummary [userid=" + userid + ", daysummary=" + daysummary
-				+ ", date=" + date + "]";
+		return "DaySummary [userid=" + userid + ", score=" + score
+				+ ", daysummary=" + daysummary + ", date=" + date + "]";
 	}
 	public Integer getUserid() {
 		return userid;
@@ -22,12 +25,19 @@ public class DaySummary {
 	public void setDaysummary(String daysummary) {
 		this.daysummary = daysummary;
 	}
-	public String getDate() {
+	public Date getDate() {
 		return date;
 	}
-	public void setDate(String date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
+	public int getScore() {
+		return score;
+	}
+	public void setScore(int score) {
+		this.score = score;
+	}
+
 	
 	
 }
