@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goc.dao.ResourcesMapper">
+	<resultMap id="BaseResultMap" type="goc.pojo.Resources">
+		<result column="writer" property="writer" jdbcType="VARCHAR" />
+		<result column="head" property="head" jdbcType="VARCHAR" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="date" property="date" jdbcType="DATE" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="text" property="text" jdbcType="VARCHAR" />
+		<result column="category" property="category" jdbcType="VARCHAR" />
+		<result column="browsings" property="browsings" jdbcType="INTEGER" />
+		<result column="fabulous" property="fabulous" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		writer,head,title,date,type,text,category,browsings,fabulous
+	</sql>
+	
+	<select id="SelectAll" resultMap="BaseResultMap" >
+		select
+		<include refid="Base_Column_List"/>
+		from resources
+	</select>
+	
+	<select id="SelectByType" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from resources
+		where type=#{type,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SelectByTitle" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from resources
+		where title=#{title,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SelectHot" resultMap="BaseResultMap">
+	    select
+		<include refid="Base_Column_List" />
+	    from resources
+	    limit 5
+	</select>
+</mapper>
