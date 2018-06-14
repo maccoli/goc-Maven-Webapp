@@ -3,62 +3,53 @@ package goc.controller;
 import goc.pojo.User;
 import goc.service.UserService;
 import goc.util.MD5Util;
+import goc.util.RsetCutil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.naming.java.javaURLContextFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.gson.Gson;
+
+
 @Controller
-@RequestMapping("/user")
+@RequestMapping(value="/user")
 public class UserController {
 
 	@Resource
 	private UserService userService;
-	
+
 	@ResponseBody
-	@RequestMapping(value="/register",produces="text/json;charset=UTF-8")
+	@RequestMapping(value="/register", produces = "text/json;charset=UTF-8")
 	public void register(HttpServletResponse response,HttpServletRequest request) throws IOException{
+		//调用数据方法
+		RsetCutil rsl = new RsetCutil();
+		rsl.setCE(response, request);
+		
 		User user = new User();
-		String password = "";
-		String phone = "";
-		String username = "";
-		String verifycode = "0";
-		String svc =(String) request.getSession().getAttribute("sessionverify");  
+		String password = request.getParameter("password");
+		String phone = request.getParameter("phone");
+		String verifycode = request.getParameter("verifycode");
+
+		String svc =(String) request.getSession().getAttribute("sessionverify");
+
+		Gson gson = new Gson();
 		
-		StringBuffer requestBody;
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("text/json;charset=UTF-8");
-		try {
-			BufferedReader reader = request.getReader();
-			String input = null;
-			requestBody = new StringBuffer();
-			while((input = reader.readLine())!=null){
-				requestBody.append(input);
-				JSONObject jsonObject = new JSONObject();
-				phone = jsonObject.get("phone").toString();
-				password = jsonObject.get("password").toString();
-				verifycode = jsonObject.get("verifycode").toString();
-			}
-		}catch(JSONException e1){
-			
-			e1.printStackTrace();
-		}catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		JSONObject jsonObject = new JSONObject();
 		if(svc.equals(verifycode)){
 			try {
 				password = MD5Util.encrypt(password);
@@ -66,106 +57,128 @@ public class UserController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			user.setUsername(username);
+
+			
+			
 			user.setPhone(phone);
 			user.setPassword(password);
-			user.setUsername("user_"+phone.substring(0, 4));
-			this.userService.InsertUser(user);
-			jsonObject.put("notcie", "ok");
+			user.setUsername("user_"+phone.substring(4, 8));
+			user.setHead("hp1.png");
+			user.setCover("cover1_1.png");
+			User user2 = this.userService.SelectByPhone(phone);
+			
+			
+			if(user2 != null){
+				response.getWriter().write(gson.toJson("该手机号已经注册,请重新输入"));
+				//jsonObject.put("notice", "该手机号已经注册,请重新输入");
+			}else{
+				   java.sql.Date date = new java.sql.Date(new Date().getTime());
+				   user.setDate(date);
+		           this.userService.InsertUser(user);
+		           response.getWriter().write(gson.toJson("注册成功"));
+			}
+		}else {
+			
+			 response.getWriter().write(gson.toJson("验证码错误"));
 		}
-		else {
-			jsonObject.put("notice", "yzmcw");
-		}
-		
-		response.getWriter().write(jsonObject.toString());
-		
+				
 	}
 	
 	@ResponseBody
 	@RequestMapping(value="/login",produces="text/json;charset=UTF-8")
-	public void login(HttpServletResponse response,HttpServletRequest request) throws IOException{
+	public void login(HttpServletResponse response,HttpServletRequest request,HttpSession session) throws IOException{
+		RsetCutil rsl = new RsetCutil();
+		rsl.setCE(response, request);
+	
+		
 		User user = new User();
-		String phone = "";
-		String password = "";
-		String verifycode = "0";
+		String phone = request.getParameter("phone");
+		String password = request.getParameter("password");
+		String verifycode = request.getParameter("verifycode");
 		String password2 = "";
 		String svc =(String) request.getSession().getAttribute("sessionverify");  
 		
-		StringBuffer requestBody;
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("text/json;charset=UTF-8");
-		try {
-			BufferedReader reader = request.getReader();
-			String input = null;
-			requestBody = new StringBuffer();
-			while((input = reader.readLine())!=null){
-				requestBody.append(input);
-				JSONObject jsonObject = new JSONObject();
-				phone = jsonObject.get("phone").toString();
-				password = jsonObject.get("password").toString();
-				verifycode = jsonObject.get("verifycode").toString();
-			}
-		}catch(JSONException e1){
-	
-			e1.printStackTrace();
-		}catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		JSONObject jsonObject = new JSONObject();
+		Gson gson = new Gson();
 
+		Map<String, Object> resultMap = new HashMap<>();
+		
 	    user = this.userService.SelectByPhone(phone);
 		if(svc.equals(verifycode)){
 			try {
 				password2 = MD5Util.encrypt(password);// MD5加密
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
+		
 				e.printStackTrace();
 			}
 			if(password2.equals(user.getPassword())){
-				request.getSession().setAttribute("user", user);
-				jsonObject.put("notice", "ok");
-			}
-			else{ 
-				jsonObject.put("notice", "mmcw");	
+				session.setAttribute("user", user);
+				
+				String notice = "登陆成功";
+			//	resultMap.put("notice", notice);
+				
+				if(user.getDirection()==null||user.getDirection()=="")
+				{
+					String notice2 = "未选择方向";
+				
+					resultMap.put("notice", notice);
+					resultMap.put("direction", notice2);
+
+					response.getWriter().write(gson.toJson(resultMap));
+				//jsonObject.put("direction", "未选择方向");
+				}else{
+					String notice2 = "已选择方向";
+					resultMap.put("notice", notice);
+					resultMap.put("direction", notice2);
+					response.getWriter().write(gson.toJson(resultMap));
+
+				}
+			}else{ 
+				String notice = "密码错误";
+				resultMap.put("notice", notice);
+				response.getWriter().write(gson.toJson(resultMap));
 			}
 		}
 		else{
-			jsonObject.put("notice", "yzmcw");
+			String notice = "验证码错误";
+			resultMap.put("notice", notice);
+			response.getWriter().write(gson.toJson(resultMap));
 		}
-		response.getWriter().write(jsonObject.toString());
+
 	}
 	
 	@ResponseBody
-	@RequestMapping(value="changePW",produces="text/json;charset=UTF-8")
+	@RequestMapping(value="changePW")
 	public String changePW(HttpServletResponse response,HttpServletRequest request){
-		String password = "";
-		User user = (User) request.getSession().getAttribute("user");
-		int userid  = user.getUserid();
+		RsetCutil rsl = new RsetCutil();
+		rsl.setCE(response, request);
 		
-		StringBuffer requestBody;
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("text/json;charset=UTF-8");
-		try {
-			BufferedReader reader = request.getReader();
-			String input = null;
-			requestBody = new StringBuffer();
-			while((input = reader.readLine())!=null){
-				requestBody.append(input);
-				JSONObject jsonObject = new JSONObject();
-				password = jsonObject.get("password").toString();
-			}
-		}catch(JSONException e1){
-	
-			e1.printStackTrace();
-		}catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		String password = request.getParameter("password");
+		User user = (User) request.getSession().getAttribute("user");
+	//	Integer userid  = user.getUserid();
 
-		user.setPassword(password);
+		String password2 = "";
+		try {
+			password2 = MD5Util.encrypt(password);// MD5加密
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		user.setPassword(password2);
 		this.userService.UpdateByUserid(user);
 		return "更改密码成功";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="/exitUser")
+	public String exitUser(HttpServletResponse response,HttpServletRequest request,HttpSession session){
+		RsetCutil rsl = new RsetCutil();
+		rsl.setCE(response, request);
+		
+		session.removeAttribute("user");
+		
+		session.removeAttribute("belong");
+		System.out.println("退出成功！");
+		
+		return "退出成功!";
 	}
 }
